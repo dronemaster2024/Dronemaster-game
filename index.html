@@ -139,5 +139,190 @@
 <footer>
     © 2025 Dronemaster. Alla rättigheter förbehållna.
   </footer>
+
+
+<section class="section" id="signup">
+  <h2>Skapa konto</h2>
+  <form id="signup-form" onsubmit="return handleSignup(event)" style="max-width: 400px; margin: auto;">
+    <label for="username">Användarnamn:</label><br/>
+    <input type="text" id="username" name="username" required style="width: 100%; padding: 0.5rem; margin-bottom: 1rem;" /><br/>
+    <label for="email">E-postadress:</label><br/>
+    <input type="email" id="email" name="email" required style="width: 100%; padding: 0.5rem; margin-bottom: 1rem;" /><br/>
+    <label for="password">Lösenord:</label><br/>
+    <input type="password" id="password" name="password" required style="width: 100%; padding: 0.5rem; margin-bottom: 1rem;" /><br/>
+    <button type="submit" class="btn">Skapa konto</button>
+  </form>
+  <p id="signup-message" style="text-align:center; color:#00ff00; margin-top:1rem;"></p>
+</section>
+<section class="section" id="verify-email-section" style="display:none;">
+  <h2>Verifiera din e-post</h2>
+  <p>Vi har skickat en verifieringslänk till din e-postadress (simulerat).</p>
+  <button class="btn" onclick="verifyEmail()">Jag har verifierat min e-post</button>
+</section>
+
+  <h2>Skapa konto</h2>
+  <form id="signup-form" onsubmit="return handleSignup(event)" style="max-width: 400px; margin: auto;">
+    <label for="username">Användarnamn:</label><br/>
+    <input type="text" id="username" name="username" required style="width: 100%; padding: 0.5rem; margin-bottom: 1rem;" /><br/>
+    <label for="password">Lösenord:</label><br/>
+    <input type="password" id="password" name="password" required style="width: 100%; padding: 0.5rem; margin-bottom: 1rem;" /><br/>
+    <button type="submit" class="btn">Skapa konto</button>
+  </form>
+  <p id="signup-message" style="text-align:center; color:#00ff00; margin-top:1rem;"></p>
+</section>
+
+<section class="section" id="login">
+  <h2>Logga in</h2>
+  <form id="login-form" onsubmit="return handleLogin(event)" style="max-width: 400px; margin: auto;">
+    <label for="login-username">Användarnamn:</label><br/>
+    <input type="text" id="login-username" required style="width: 100%; padding: 0.5rem; margin-bottom: 1rem;" /><br/>
+    <label for="login-password">Lösenord:</label><br/>
+    <input type="password" id="login-password" required style="width: 100%; padding: 0.5rem; margin-bottom: 1rem;" /><br/>
+    <button type="submit" class="btn">Logga in</button>
+  </form>
+  <p id="login-message" style="text-align:center; color:#00ff00; margin-top:1rem;"></p>
+</section>
+
+<section class="section" id="user-area" style="display: none;">
+  <h2>Välkommen, <span id="user-name"></span>!</h2>
+  <p>Du är nu inloggad och kan få tillgång till exklusivt innehåll.</p>
+  <button class="btn" onclick="logout()">Logga ut</button>
+</section>
+
+<section class="section" id="forum" style="display: none;">
+  <h2>Forum</h2>
+  <form id="forum-form" onsubmit="return postMessage(event)" style="max-width: 600px; margin: auto;">
+    <textarea id="forum-input" placeholder="Skriv ett meddelande..." required
+              style="width: 100%; padding: 1rem; height: 100px; margin-bottom: 1rem;"></textarea><br/>
+    <button class="btn" type="submit">Skicka</button>
+  </form>
+  <div id="forum-messages" style="margin-top: 2rem;"></div>
+</section>
+
+<script>
+  function handleSignup(event) {
+    event.preventDefault();
+    const username = document.getElementById("username").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    if (username.length < 3 || password.length < 6 || !email.includes("@")) {
+      document.getElementById("signup-message").textContent = "Fyll i giltig e-post, användarnamn (minst 3 tecken) och lösenord (minst 6 tecken).";
+      return;
+    }
+
+    const user = { username, email, password, verified: false };
+    localStorage.setItem("dronemaster_user", JSON.stringify(user));
+    document.getElementById("signup").style.display = "none";
+    document.getElementById("verify-email-section").style.display = "block";
+  }
+
+  function verifyEmail() {
+    const user = JSON.parse(localStorage.getItem("dronemaster_user"));
+    if (user) {
+      user.verified = true;
+      localStorage.setItem("dronemaster_user", JSON.stringify(user));
+      document.getElementById("verify-email-section").style.display = "none";
+      document.getElementById("login").style.display = "block";
+      document.getElementById("signup-message").textContent = "E-post verifierad. Du kan nu logga in.";
+    }
+  }
+
+  function handleLogin(event) {
+    event.preventDefault();
+    const loginUsername = document.getElementById("login-username").value.trim();
+    const loginPassword = document.getElementById("login-password").value;
+    const storedUser = JSON.parse(localStorage.getItem("dronemaster_user"));
+    if (!storedUser || storedUser.username !== loginUsername || storedUser.password !== loginPassword) {
+      document.getElementById("login-message").textContent = "Fel användarnamn eller lösenord.";
+      return;
+    }
+    if (!storedUser.verified) {
+      document.getElementById("login-message").textContent = "Du måste verifiera din e-post innan du kan logga in.";
+      return;
+    }
+    localStorage.setItem("loggedInUser", loginUsername);
+    showUserArea(loginUsername);
+    document.getElementById("login-form").reset();
+  }
+    event.preventDefault();
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
+    if (username.length < 3 || password.length < 6) {
+      document.getElementById("signup-message").textContent = "Minst 3 tecken för användarnamn och 6 för lösenord.";
+      return;
+    }
+    localStorage.setItem("dronemaster_user", JSON.stringify({ username, password }));
+    document.getElementById("signup-message").textContent = "Konto skapat!";
+    event.target.reset();
+  }
+
+  function handleLogin(event) {
+    event.preventDefault();
+    const loginUsername = document.getElementById("login-username").value.trim();
+    const loginPassword = document.getElementById("login-password").value;
+    const storedUser = JSON.parse(localStorage.getItem("dronemaster_user"));
+    if (!storedUser || storedUser.username !== loginUsername || storedUser.password !== loginPassword) {
+      document.getElementById("login-message").textContent = "Fel användarnamn eller lösenord.";
+      return;
+    }
+    localStorage.setItem("loggedInUser", loginUsername);
+    showUserArea(loginUsername);
+    document.getElementById("login-form").reset();
+  }
+
+  function showUserArea(username) {
+    document.getElementById("user-name").textContent = username;
+    document.getElementById("user-area").style.display = "block";
+    document.getElementById("signup").style.display = "none";
+    document.getElementById("login").style.display = "none";
+    document.getElementById("forum").style.display = "block";
+    loadMessages();
+  }
+
+  function logout() {
+    localStorage.removeItem("loggedInUser");
+    document.getElementById("user-area").style.display = "none";
+    document.getElementById("signup").style.display = "block";
+    document.getElementById("login").style.display = "block";
+    document.getElementById("forum").style.display = "none";
+  }
+
+  function postMessage(event) {
+    event.preventDefault();
+    const text = document.getElementById("forum-input").value.trim();
+    const username = localStorage.getItem("loggedInUser");
+    if (!text) return;
+    const message = {
+      user: username,
+      text: text,
+      time: new Date().toLocaleString()
+    };
+    const messages = JSON.parse(localStorage.getItem("forumMessages")) || [];
+    messages.push(message);
+    localStorage.setItem("forumMessages", JSON.stringify(messages));
+    document.getElementById("forum-input").value = "";
+    loadMessages();
+  }
+
+  function loadMessages() {
+    const messages = JSON.parse(localStorage.getItem("forumMessages")) || [];
+    const container = document.getElementById("forum-messages");
+    container.innerHTML = "";
+    messages.forEach(msg => {
+      const div = document.createElement("div");
+      div.style.borderBottom = "1px solid #444";
+      div.style.padding = "0.5rem 0";
+      div.innerHTML = `<strong>${msg.user}</strong> <small style="color:gray;">(${msg.time})</small><br/>${msg.text}`;
+      container.appendChild(div);
+    });
+  }
+
+  window.onload = function () {
+    const user = localStorage.getItem("loggedInUser");
+    if (user) showUserArea(user);
+  };
+</script>
+
 </body>
 </html>
